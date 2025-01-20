@@ -1,0 +1,13 @@
+{
+  "accepted_payloads": [
+    "6e657874"
+  ],
+  "counters": {
+    "valid_frames": 1,
+    "crc_errors": 0,
+    "invalid_lengths": 0,
+    "incomplete_frames": 1,
+    "discarded_bytes": 0
+  },
+  "cycles": 18
+}
