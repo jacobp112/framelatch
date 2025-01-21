@@ -158,3 +158,101 @@ async def output_backpressure(dut):
     assert b.accepted == [first, second]
     assert b.model.counts["incomplete_frames"] == 0
     b.save("output_backpressure")
+
+
+@cocotb.test()
+async def all_lengths_and_crc_faults(dut):
+    b = Bench(dut)
+    await b.start()
+    expected = []
+    for length in range(1, 17):
+        payload = bytes((i * 37 + length) & 255 for i in range(length))
+        frame = encode(payload)
+        await b.send(frame)
+        expected.append(payload)
+        for bit in range(8):
+            corrupt = frame[:-1] + bytes([frame[-1] ^ (1 << bit)])
+            await b.send(corrupt)
+        for byte_index in range(2, 2 + length):
+            corrupt = bytearray(frame)
+            corrupt[byte_index] ^= 1
+            await b.send(corrupt)
+    await b.drain()
+    assert b.accepted == expected
+    assert b.model.counts["crc_errors"] == 128 + sum(range(1, 17))
+    b.save("all_lengths_and_crc_faults")
+
+
+@cocotb.test()
+async def every_invalid_length(dut):
+    b = Bench(dut)
+    await b.start()
+    for length in [0, *range(17, 256)]:
+        await b.send(bytes([0xA5, length]))
+    await b.drain()
+    assert b.accepted == []
+    assert b.model.counts["invalid_lengths"] == 240
+    assert b.model.counts["discarded_bytes"] == 0
+    b.save("every_invalid_length")
+
+
+@cocotb.test()
+async def all_input_byte_values(dut):
+    b = Bench(dut)
+    await b.start()
+    expected = []
+    for byte in range(256):
+        payload = bytes([byte])
+        await b.send(encode(payload))
+        expected.append(payload)
+    await b.drain()
+    assert b.accepted == expected
+    assert b.model.counts["valid_frames"] == 256
+    b.save("all_input_byte_values")
+
+
+@cocotb.test()
+async def reset_and_abort_priority(dut):
+    b = Bench(dut)
+    await b.start()
+    frame = encode(b"stage")
+    # Before sync, after sync, after length, every payload byte, before CRC,
+    # and with a validated output pending. Reset must cancel everything.
+    for prefix in range(len(frame) + 1):
+        await b.send(frame[:prefix])
+        await b.cycle(reset=True, abort=True, valid=True, data=0xA5, ready=True)
+        assert b.model.counts == dict.fromkeys(COUNTERS, 0)
+        await b.drain()
+    for prefix in range(1, len(frame)):
+        await b.send(frame[:prefix])
+        previous = b.model.counts["incomplete_frames"]
+        await b.cycle(abort=True, valid=True, data=0x11)
+        await b.cycle(abort=True)
+        assert b.model.counts["incomplete_frames"] == previous + 1
+    await b.send(encode(b"alive"))
+    await b.drain()
+    assert b.accepted == [b"alive"]
+    b.save("reset_and_abort_priority")
+
+
+@cocotb.test()
+async def counter_saturation(dut):
+    b = Bench(dut)
+    await b.start()
+    # Deposit near-overflow values rather than simulate 2^32 events.
+    for counter in COUNTERS:
+        getattr(dut.uut, counter).value = MAX_COUNT - 1
+        b.model.counts[counter] = MAX_COUNT - 1
+    await Timer(1, unit="ns")
+    for _ in range(2):
+        await b.send(b"\x11")
+        await b.send(b"\xa5\x00")
+        frame = encode(b"\x00")
+        await b.send(frame[:-1] + bytes([frame[-1] ^ 1]))
+        await b.send(b"\xa5")
+        await b.cycle(abort=True)
+        await b.send(encode(b"ok"))
+    await b.drain()
+    assert all(value == MAX_COUNT for value in b.model.counts.values())
+    await b.cycle(reset=True)
+    b.save("counter_saturation")
