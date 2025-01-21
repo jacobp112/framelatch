@@ -105,3 +105,56 @@ async def successful_frame(dut):
     assert b.accepted == [payload]
     assert b.model.counts["valid_frames"] == 1
     b.save("successful_frame")
+
+
+@cocotb.test()
+async def crc_rejection(dut):
+    b = Bench(dut)
+    await b.start()
+    dut.scenario.value = 2
+    frame = bytearray(encode(b"bad"))
+    frame[-1] ^= 1
+    await b.send(frame)
+    await b.drain()
+    assert b.accepted == []
+    assert b.model.counts["crc_errors"] == 1
+    await b.send(encode(b"recovered"))
+    await b.drain()
+    assert b.accepted == [b"recovered"]
+    b.save("crc_rejection")
+
+
+@cocotb.test()
+async def incomplete_frame(dut):
+    b = Bench(dut)
+    await b.start()
+    dut.scenario.value = 3
+    await b.send(bytes.fromhex("a5041122"))
+    await b.cycle(abort=True, valid=True, data=0xA5)
+    await b.cycle(abort=True)
+    assert b.model.counts["incomplete_frames"] == 1
+    await b.send(encode(b"next"))
+    await b.drain()
+    assert b.accepted == [b"next"]
+    b.save("incomplete_frame")
+
+
+@cocotb.test()
+async def output_backpressure(dut):
+    b = Bench(dut)
+    await b.start()
+    dut.scenario.value = 4
+    first, second = b"held", b"released"
+    await b.send(encode(first)[:-1])
+    await b.cycle(data=encode(first)[-1], valid=True, ready=False)
+    for _ in range(200):
+        assert not await b.cycle(data=0xA5, valid=True, ready=False)
+    # Abort cancels the stalled source byte, not the validated output.
+    await b.cycle(abort=True, ready=False)
+    await b.cycle(abort=True, ready=True)
+    assert b.accepted == [first]
+    await b.send(encode(second))
+    await b.drain()
+    assert b.accepted == [first, second]
+    assert b.model.counts["incomplete_frames"] == 0
+    b.save("output_backpressure")
