@@ -161,6 +161,32 @@ async def output_backpressure(dut):
 
 
 @cocotb.test()
+async def malformed_corpus(dut):
+    b = Bench(dut)
+    await b.start()
+    corpus = json.loads((ROOT / "corpus" / "frames.json").read_text())
+    for index, case in enumerate(corpus["cases"]):
+        await b.cycle(reset=True)
+        b.accepted.clear()
+        dut.scenario.value = index + 10
+        for action in case["actions"]:
+            if "bytes" in action:
+                await b.send(bytes.fromhex(action["bytes"]))
+            elif "reset" in action:
+                await b.cycle(reset=True, abort=True, valid=True, data=0xA5)
+                b.accepted.clear()
+            elif "abort" in action:
+                await b.cycle(abort=True)
+            elif "stall" in action:
+                for _ in range(action["stall"]):
+                    await b.cycle(ready=False)
+        await b.drain()
+        assert [p.hex() for p in b.accepted] == case["accepted"], case["name"]
+        assert b.model.counts == case["counters"], case["name"]
+    b.save("malformed_corpus")
+
+
+@cocotb.test()
 async def all_lengths_and_crc_faults(dut):
     b = Bench(dut)
     await b.start()
