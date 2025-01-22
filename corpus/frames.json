@@ -147,6 +147,187 @@
         "incomplete_frames": 1,
         "discarded_bytes": 0
       }
+    },
+    {
+      "name": "sync_inside_payload",
+      "actions": [
+        {
+          "bytes": "a504a500a5ff94"
+        }
+      ],
+      "accepted": [
+        "a500a5ff"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "consecutive_frames",
+      "actions": [
+        {
+          "bytes": "a5036f6e65a7a50374776f35"
+        }
+      ],
+      "accepted": [
+        "6f6e65",
+        "74776f"
+      ],
+      "counters": {
+        "valid_frames": 2,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "reset_search",
+      "actions": [
+        {
+          "bytes": ""
+        },
+        {
+          "reset": true
+        },
+        {
+          "bytes": "a5046e6578745a"
+        }
+      ],
+      "accepted": [
+        "6e657874"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "reset_length",
+      "actions": [
+        {
+          "bytes": "a5"
+        },
+        {
+          "reset": true
+        },
+        {
+          "bytes": "a5046e6578745a"
+        }
+      ],
+      "accepted": [
+        "6e657874"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "reset_payload_start",
+      "actions": [
+        {
+          "bytes": "a505"
+        },
+        {
+          "reset": true
+        },
+        {
+          "bytes": "a5046e6578745a"
+        }
+      ],
+      "accepted": [
+        "6e657874"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "reset_payload_middle",
+      "actions": [
+        {
+          "bytes": "a5057374"
+        },
+        {
+          "reset": true
+        },
+        {
+          "bytes": "a5046e6578745a"
+        }
+      ],
+      "accepted": [
+        "6e657874"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "reset_crc",
+      "actions": [
+        {
+          "bytes": "a5057374616765"
+        },
+        {
+          "reset": true
+        },
+        {
+          "bytes": "a5046e6578745a"
+        }
+      ],
+      "accepted": [
+        "6e657874"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "reset_pending_output",
+      "actions": [
+        {
+          "bytes": "a5057374616765d3"
+        },
+        {
+          "reset": true
+        },
+        {
+          "bytes": "a5046e6578745a"
+        }
+      ],
+      "accepted": [
+        "6e657874"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
     }
   ]
 }
