@@ -1,0 +1,13 @@
+{
+  "accepted_payloads": [
+    "7265636f7665726564"
+  ],
+  "counters": {
+    "valid_frames": 1,
+    "crc_errors": 1,
+    "invalid_lengths": 0,
+    "incomplete_frames": 0,
+    "discarded_bytes": 0
+  },
+  "cycles": 26
+}

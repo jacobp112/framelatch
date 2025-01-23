@@ -1,0 +1,13 @@
+{
+  "accepted_payloads": [
+    "10a500ff"
+  ],
+  "counters": {
+    "valid_frames": 1,
+    "crc_errors": 0,
+    "invalid_lengths": 0,
+    "incomplete_frames": 0,
+    "discarded_bytes": 0
+  },
+  "cycles": 12
+}

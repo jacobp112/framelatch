@@ -1,13 +1,16 @@
 """Run reference tests, cocotb simulations, waveform selections, or synthesis."""
 
 import argparse
+import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "sim")]
+SELECTED = ("successful_frame", "crc_rejection", "incomplete_frame", "output_backpressure")
 
 
 def checked(command, **kwargs):
@@ -44,13 +47,28 @@ def simulate(name, seed):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["unit", "test", "synth", "all"])
+    parser.add_argument("command", choices=["unit", "test", "demo", "waves", "synth", "all"])
     parser.add_argument("--seed", type=int, default=1931)
     args = parser.parse_args()
     if args.command in ("unit", "test", "all"):
         checked([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"])
     if args.command in ("test", "all"):
         simulate("regression", args.seed)
+    if args.command in ("demo", "all"):
+        build = simulate("demo", args.seed)
+        result = json.loads((build / "demo.json").read_text())
+        print("Accepted payloads:")
+        for payload in result["accepted_payloads"]:
+            data = bytes.fromhex(payload)
+            print(f"  {payload}  {data!r}")
+        print("Error/event counters: " + json.dumps(result["counters"], sort_keys=True))
+    if args.command in ("waves", "all"):
+        output = ROOT / "docs" / "waveforms"
+        output.mkdir(parents=True, exist_ok=True)
+        for name in SELECTED:
+            build = simulate(name, args.seed)
+            shutil.copyfile(build / "trace.fst", output / f"{name}.fst")
+            shutil.copyfile(build / f"{name}.json", output / f"{name}.json")
     if args.command in ("synth", "all"):
         build = ROOT / "build"
         build.mkdir(exist_ok=True)

@@ -309,3 +309,26 @@ async def randomized_streams(dut):
             await b.send(frame, rng)
     await b.drain()
     b.save("randomized_streams")
+
+
+@cocotb.test()
+async def demo(dut):
+    b = Bench(dut)
+    await b.start()
+    dut.scenario.value = 100
+    await b.send(bytes.fromhex("001122"))
+    await b.send(encode(b"FrameLatch"))
+    await b.send(bytes.fromhex("a500a511"))
+    bad = encode(b"reject")
+    await b.send(bad[:-1] + bytes([bad[-1] ^ 1]))
+    await b.send(bytes.fromhex("a5041122"))
+    await b.cycle(abort=True)
+    last = encode(bytes.fromhex("a500ff"))
+    await b.send(last[:-1])
+    await b.cycle(data=last[-1], valid=True, ready=False)
+    for _ in range(25):
+        await b.cycle(ready=False)
+    await b.drain()
+    assert b.accepted == [b"FrameLatch", bytes.fromhex("a500ff")]
+    assert b.model.counts == dict(zip(COUNTERS, [2, 1, 2, 1, 3]))
+    b.save("demo")

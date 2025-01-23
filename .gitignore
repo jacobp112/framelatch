@@ -7,5 +7,6 @@
 *.pyc
 *.vcd
 *.fst
+!/docs/waveforms/*.fst
 /results.xml
 /.tool-cache/
