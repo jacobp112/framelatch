@@ -282,3 +282,30 @@ async def counter_saturation(dut):
     assert all(value == MAX_COUNT for value in b.model.counts.values())
     await b.cycle(reset=True)
     b.save("counter_saturation")
+
+
+@cocotb.test()
+async def randomized_streams(dut):
+    b = Bench(dut)
+    await b.start()
+    rng = random.Random(int(os.environ.get("FRAMELATCH_SEED", "1931")))
+    for iteration in range(500):
+        kind = rng.randrange(7)
+        payload = bytes(rng.randrange(256) for _ in range(rng.randrange(1, 17)))
+        frame = encode(payload)
+        if kind == 0:
+            await b.send(bytes([rng.choice([0, 1, 0xFF, 0xA4])]), rng)
+        elif kind == 1:
+            await b.send(bytes([0xA5, rng.choice([0, 17, 0xA5, 255])]), rng)
+        elif kind == 2:
+            await b.send(frame[:-1] + bytes([frame[-1] ^ rng.randrange(1, 256)]), rng)
+        elif kind == 3:
+            await b.send(frame[:rng.randrange(1, len(frame))], rng)
+            await b.cycle(abort=True, ready=rng.random() < 0.5)
+        elif kind == 4:
+            await b.send(frame[:rng.randrange(len(frame) + 1)], rng)
+            await b.cycle(reset=True, abort=True, ready=rng.random() < 0.5)
+        else:
+            await b.send(frame, rng)
+    await b.drain()
+    b.save("randomized_streams")

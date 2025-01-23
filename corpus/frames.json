@@ -328,6 +328,144 @@
         "incomplete_frames": 0,
         "discarded_bytes": 0
       }
+    },
+    {
+      "name": "abort_while_idle",
+      "actions": [
+        {
+          "abort": true
+        },
+        {
+          "abort": true
+        }
+      ],
+      "accepted": [],
+      "counters": {
+        "valid_frames": 0,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "repeated_abort_counts_once",
+      "actions": [
+        {
+          "bytes": "a502"
+        },
+        {
+          "abort": true
+        },
+        {
+          "abort": true
+        }
+      ],
+      "accepted": [],
+      "counters": {
+        "valid_frames": 0,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 1,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "search_noise",
+      "actions": [
+        {
+          "bytes": "001122ffa5046e6578745a"
+        }
+      ],
+      "accepted": [
+        "6e657874"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 4
+      }
+    },
+    {
+      "name": "long_output_stall",
+      "actions": [
+        {
+          "bytes": "a50468656c645d"
+        },
+        {
+          "stall": 256
+        }
+      ],
+      "accepted": [
+        "68656c64"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "abort_keeps_pending_output",
+      "actions": [
+        {
+          "bytes": "a50468656c645d"
+        },
+        {
+          "stall": 20
+        },
+        {
+          "abort": true
+        }
+      ],
+      "accepted": [
+        "68656c64"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "bad_crc_sync_is_consumed",
+      "actions": [
+        {
+          "bytes": "a50100a5a5046e6578745a"
+        }
+      ],
+      "accepted": [
+        "6e657874"
+      ],
+      "counters": {
+        "valid_frames": 1,
+        "crc_errors": 1,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
+    },
+    {
+      "name": "no_abort_no_truncation_event",
+      "actions": [
+        {
+          "bytes": "a5041122"
+        }
+      ],
+      "accepted": [],
+      "counters": {
+        "valid_frames": 0,
+        "crc_errors": 0,
+        "invalid_lengths": 0,
+        "incomplete_frames": 0,
+        "discarded_bytes": 0
+      }
     }
   ]
 }
