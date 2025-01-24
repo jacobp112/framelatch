@@ -1,0 +1,25 @@
+[*] FrameLatch input, parser, and validated output
+[size] 1400 800
+[timestart] 0
+@28
+framelatch_tb.clk
+framelatch_tb.rst
+framelatch_tb.in_abort
+framelatch_tb.in_valid
+framelatch_tb.in_ready
+@22
+framelatch_tb.in_data[7:0]
+framelatch_tb.uut.state[1:0]
+framelatch_tb.uut.crc_acc[7:0]
+framelatch_tb.uut.assembly[127:0]
+@28
+framelatch_tb.out_valid
+framelatch_tb.out_ready
+@22
+framelatch_tb.out_length[4:0]
+framelatch_tb.out_payload[127:0]
+framelatch_tb.valid_frames[31:0]
+framelatch_tb.crc_errors[31:0]
+framelatch_tb.invalid_lengths[31:0]
+framelatch_tb.incomplete_frames[31:0]
+framelatch_tb.discarded_bytes[31:0]
